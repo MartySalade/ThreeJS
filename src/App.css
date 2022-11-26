@@ -2,6 +2,22 @@
   text-align: center;
 }
 
-.div {
+canvas {
   height: 100vh;
+}
+
+.button_close {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  color: black;
+  border: none;
+  background-color: white;
+  border-radius: 100%;
+  padding: 1rem;
+  cursor: pointer;
+}
+.button_close:hover {
+  transform: scale(1.05);
+  transition: ease 0.2s;
 }
