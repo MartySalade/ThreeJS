@@ -1,12 +1,27 @@
 import React from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
-
+import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader";
+import { MTLLoader } from "three/examples/jsm/loaders/MTLLoader";
+import * as dat from "dat.gui";
 export default class Scene extends React.Component {
   constructor(props) {
     super(props);
     this.canvasRef = React.createRef();
     this.camera_position = new THREE.Vector3(50, 50, 50);
+    this.camera = new THREE.PerspectiveCamera(
+      75,
+      window.innerWidth / window.innerHeight,
+      0.1,
+      1000
+    );
+    this.inZoom = false;
+    this.initial = true;
+    this.light_x = 30;
+    this.light_y = 30;
+    this.light_z = 30;
+    this.distance = 100;
+    this.angle = Math.PI / 20;
   }
 
   componentDidMount() {
@@ -15,7 +30,7 @@ export default class Scene extends React.Component {
       event.preventDefault();
       mouse.x = (event.clientX / renderer.domElement.clientWidth) * 2 - 1;
       mouse.y = -(event.clientY / renderer.domElement.clientHeight) * 2 + 1;
-      raycaster.setFromCamera(mouse, camera);
+      raycaster.setFromCamera(mouse, this.camera);
 
       var intersects = raycaster.intersectObjects(scene.children);
 
@@ -23,6 +38,8 @@ export default class Scene extends React.Component {
         // Call a specific function foreach building or citizen
         intersects[0].object.callback();
 
+        this.inZoom = true;
+        this.initial = false;
         // Set the new position of the camera depeding on the object
         this.camera_position.copy(
           new THREE.Vector3(
@@ -36,16 +53,20 @@ export default class Scene extends React.Component {
 
     var scene = new THREE.Scene();
     scene.background = new THREE.Color("#130f40");
-    var camera = new THREE.PerspectiveCamera(
-      75,
-      window.innerWidth / window.innerHeight,
-      0.1,
-      1000
-    );
     var renderer = new THREE.WebGLRenderer();
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
-    var controls = new OrbitControls(camera, renderer.domElement);
+    var controls = new OrbitControls(this.camera, renderer.domElement);
+    var spotLight = new THREE.SpotLight(0xff0000);
+    spotLight.distance = this.distance;
+    spotLight.angle = this.angle;
+    // scene.add(spotLight);
+    // const spotLightHelper = new THREE.SpotLightHelper(spotLight);
+    // scene.add(spotLightHelper);
+    const directional_light = new THREE.DirectionalLight(0xffffff, 1);
+    directional_light.position.set(-2, 4, 10);
+    scene.add(directional_light);
+
     // controls.enableZoom = false;
     // controls.enableRotate = false;
 
@@ -58,6 +79,38 @@ export default class Scene extends React.Component {
     var material2 = new THREE.MeshBasicMaterial({ color: 0x0000ff });
     var cube2 = new THREE.Mesh(geometry3, material2);
 
+    const park_material = new THREE.MeshStandardMaterial();
+    const texture_loader = new THREE.TextureLoader();
+    texture_loader.load("./assets/textures/park.png", (texture) => {
+      // texture.wrapS = RepeatWrapping;
+      // texture.wrapT = RepeatWrapping;
+      park_material.map = texture;
+    });
+
+    new MTLLoader()
+      .setPath("./assets/models/textures/")
+      .load("park.mtl", function (materials) {
+        materials.preload();
+        new OBJLoader()
+          .setMaterials(materials)
+          .setPath("./assets/models/")
+          .load(
+            "park.obj",
+            function (object) {
+              object.traverse((child) => {
+                if (child instanceof THREE.Mesh) {
+                  child.material = park_material;
+                  child.castShadow = true;
+                }
+              });
+
+              scene.add(object);
+            },
+            (xhr) => console.log((xhr.loaded / xhr.total) * 100 + "% loaded"),
+            (err) => console.error(err)
+          );
+      });
+
     cube.callback = function () {
       // console.log("Building1");
     };
@@ -67,13 +120,13 @@ export default class Scene extends React.Component {
 
     cube.position.set(0, 10, 0);
     cube2.position.set(30, 15, 0);
-    scene.add(cube, cube2);
-    camera.position.x = 50;
-    camera.position.y = 50;
-    camera.position.z = 50;
+    // scene.add(cube, cube2);
+    this.camera.position.x = 50;
+    this.camera.position.y = 50;
+    this.camera.position.z = 50;
 
     const geometry2 = new THREE.PlaneGeometry(100, 100);
-    const planeMaterial = new THREE.MeshPhysicalMaterial({ color: 0x130f40 });
+    const planeMaterial = new THREE.MeshPhysicalMaterial({ color: 0x000000 });
     geometry2.rotateX(-Math.PI * 0.5);
     const plane = new THREE.Mesh(geometry2, planeMaterial);
     plane.receiveShadow = true;
@@ -86,17 +139,29 @@ export default class Scene extends React.Component {
     // Main loop
     var animate = () => {
       requestAnimationFrame(animate);
-      controls.update();
       // Smooth move for the camera
-      camera.position.lerp(this.camera_position, 0.05);
-      renderer.render(scene, camera);
+      if (this.inZoom || this.initial) {
+        // this.camera.position.lerp(this.camera_position, 0.05);
+      }
+      spotLight.position.set(this.light_x, this.light_y, this.light_z);
+      controls.update();
+      // scene.rotation.y += 0.001;
+      renderer.render(scene, this.camera);
     };
 
-    //Reset camera
+    // const gui = new dat.GUI();
+    // const lightFolder = gui.addFolder("Light");
+    // lightFolder.add(this, "light_x", 0, 100, 1);
+    // lightFolder.add(this, "light_y", 0, 100, 1);
+    // lightFolder.add(this, "light_z", 0, 100, 1);
+    // lightFolder.add(this, "angle", Math.PI / 8, Math.PI / 2, Math.PI / 8);
+    // lightFolder.open();
 
     animate();
   }
   resetCamera = () => {
+    this.inZoom = false;
+    this.initial = true;
     this.camera_position.copy(new THREE.Vector3(50, 50, 50));
   };
   componentWillUnmount() {}
