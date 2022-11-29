@@ -4,6 +4,7 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader";
 import { MTLLoader } from "three/examples/jsm/loaders/MTLLoader";
 import * as dat from "dat.gui";
+import ReactSlider from "react-slider";
 export default class Scene extends React.Component {
   constructor(props) {
     super(props);
@@ -15,13 +16,9 @@ export default class Scene extends React.Component {
       0.1,
       1000
     );
-    this.inZoom = false;
-    this.initial = true;
-    this.light_x = 30;
-    this.light_y = 30;
-    this.light_z = 30;
-    this.distance = 100;
-    this.angle = Math.PI / 20;
+    this.scene = new THREE.Scene();
+    this.loading = 0;
+    this.rotation = 0;
   }
 
   componentDidMount() {
@@ -32,105 +29,176 @@ export default class Scene extends React.Component {
       mouse.y = -(event.clientY / renderer.domElement.clientHeight) * 2 + 1;
       raycaster.setFromCamera(mouse, this.camera);
 
-      var intersects = raycaster.intersectObjects(scene.children);
-
+      var intersects = raycaster.intersectObjects(this.scene.children, true);
       if (intersects.length > 0) {
-        // Call a specific function foreach building or citizen
-        intersects[0].object.callback();
-
-        this.inZoom = true;
-        this.initial = false;
-        // Set the new position of the camera depeding on the object
+        console.log(this.scene.children);
+        const object_position =
+          this.scene.children[this.scene.children.length - 1].position;
         this.camera_position.copy(
           new THREE.Vector3(
-            intersects[0].object.position.x + 20,
-            intersects[0].object.position.y + 20,
-            intersects[0].object.position.z + 20
+            object_position.x + 10,
+            object_position.y + 5,
+            object_position.z + 10
           )
         );
       }
     };
 
-    var scene = new THREE.Scene();
-    scene.background = new THREE.Color("#130f40");
+    this.scene.background = new THREE.Color("#000000");
     var renderer = new THREE.WebGLRenderer();
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
     var controls = new OrbitControls(this.camera, renderer.domElement);
-    var spotLight = new THREE.SpotLight(0xff0000);
-    spotLight.distance = this.distance;
-    spotLight.angle = this.angle;
-    // scene.add(spotLight);
-    // const spotLightHelper = new THREE.SpotLightHelper(spotLight);
-    // scene.add(spotLightHelper);
-    const directional_light = new THREE.DirectionalLight(0xffffff, 1);
-    directional_light.position.set(-2, 4, 10);
-    scene.add(directional_light);
 
-    // controls.enableZoom = false;
-    // controls.enableRotate = false;
+    const directional_light = new THREE.AmbientLight(0xffffff, 0.4);
+    directional_light.position.set(-2, 4, 10);
+    this.scene.add(directional_light);
 
     // ========== Mesh Creation ========== //
-    var geometry = new THREE.BoxGeometry(10, 20, 10);
-    var material = new THREE.MeshBasicMaterial({ color: 0xffff00 });
-    var cube = new THREE.Mesh(geometry, material);
+    const star = new THREE.Mesh(
+      new THREE.SphereGeometry(0.2),
+      new THREE.MeshBasicMaterial({ color: 0xffffff })
+    );
 
-    var geometry3 = new THREE.BoxGeometry(15, 30, 15);
-    var material2 = new THREE.MeshBasicMaterial({ color: 0x0000ff });
-    var cube2 = new THREE.Mesh(geometry3, material2);
+    // Adding random stars
+    for (let i = 0; i < 1000; i += 1) {
+      let tmp_star = star.clone();
+      tmp_star.position.set(
+        Math.random() * (150 - -200) + -200,
+        Math.random() * (150 - -200) + -200,
+        Math.random() * (150 - -200) + -200
+      );
+      this.scene.add(tmp_star);
+    }
 
     const park_material = new THREE.MeshStandardMaterial();
+    const hq_material = new THREE.MeshStandardMaterial();
+    const hotel_material = new THREE.MeshStandardMaterial();
+    const restaurant_material = new THREE.MeshStandardMaterial();
     const texture_loader = new THREE.TextureLoader();
     texture_loader.load("./assets/textures/park.png", (texture) => {
-      // texture.wrapS = RepeatWrapping;
-      // texture.wrapT = RepeatWrapping;
       park_material.map = texture;
+    });
+    texture_loader.load("./assets/textures/HeadQuarter.png", (texture) => {
+      hq_material.map = texture;
+    });
+    texture_loader.load("./assets/textures/hotel.png", (texture) => {
+      hotel_material.map = texture;
+    });
+    texture_loader.load("./assets/textures/Restaurant.png", (texture) => {
+      restaurant_material.map = texture;
     });
 
     new MTLLoader()
       .setPath("./assets/models/textures/")
-      .load("park.mtl", function (materials) {
+      .load("park.mtl", (materials) => {
         materials.preload();
         new OBJLoader()
           .setMaterials(materials)
           .setPath("./assets/models/")
           .load(
             "park.obj",
-            function (object) {
+            (object) => {
               object.traverse((child) => {
                 if (child instanceof THREE.Mesh) {
                   child.material = park_material;
                   child.castShadow = true;
                 }
               });
-
-              scene.add(object);
+              object.position.set(-30, -0, -30);
+              object.rotation.y = 0.6;
+              this.scene.add(object);
+              this.render();
             },
-            (xhr) => console.log((xhr.loaded / xhr.total) * 100 + "% loaded"),
+            undefined,
+            (err) => console.error(err)
+          );
+      });
+    new MTLLoader()
+      .setPath("./assets/models/textures/")
+      .load("HeadQuarter.mtl", (materials) => {
+        materials.preload();
+        new OBJLoader()
+          .setMaterials(materials)
+          .setPath("./assets/models/")
+          .load(
+            "HeadQuarter.obj",
+            (object) => {
+              object.traverse((child) => {
+                if (child instanceof THREE.Mesh) {
+                  child.material = hq_material;
+                  child.castShadow = true;
+                }
+              });
+              object.position.set(20, 0, 20);
+              object.rotation.y = -0.6;
+              this.scene.add(object);
+              this.loading += 25;
+              this.render();
+            },
+            undefined,
+            (err) => console.error(err)
+          );
+      });
+    new MTLLoader()
+      .setPath("./assets/models/textures/")
+      .load("hotel.mtl", (materials) => {
+        materials.preload();
+        new OBJLoader()
+          .setMaterials(materials)
+          .setPath("./assets/models/")
+          .load(
+            "hotel.obj",
+            (object) => {
+              object.traverse((child) => {
+                if (child instanceof THREE.Mesh) {
+                  child.material = hotel_material;
+                  child.castShadow = true;
+                }
+              });
+              object.position.set(-20, 0, 20);
+              object.rotation.y = 1.2;
+              this.scene.add(object);
+              this.loading += 25;
+              this.render();
+            },
+            undefined,
+            (err) => console.error(err)
+          );
+      });
+    new MTLLoader()
+      .setPath("./assets/models/textures/")
+      .load("Restaurant.mtl", (materials) => {
+        materials.preload();
+        new OBJLoader()
+          .setMaterials(materials)
+          .setPath("./assets/models/")
+          .load(
+            "Restaurant.obj",
+            (object) => {
+              object.traverse((child) => {
+                if (child instanceof THREE.Mesh) {
+                  child.material = restaurant_material;
+                  child.castShadow = true;
+                }
+              });
+              object.position.set(20, 0, -20);
+              object.rotation.y = 1.2;
+              this.scene.add(object);
+              this.loading += 25;
+              this.render();
+            },
+            undefined,
             (err) => console.error(err)
           );
       });
 
-    cube.callback = function () {
-      // console.log("Building1");
-    };
-    cube2.callback = function () {
-      // console.log("Building2");
-    };
-
-    cube.position.set(0, 10, 0);
-    cube2.position.set(30, 15, 0);
-    // scene.add(cube, cube2);
-    this.camera.position.x = 50;
-    this.camera.position.y = 50;
-    this.camera.position.z = 50;
-
     const geometry2 = new THREE.PlaneGeometry(100, 100);
-    const planeMaterial = new THREE.MeshPhysicalMaterial({ color: 0x000000 });
+    const planeMaterial = new THREE.MeshPhysicalMaterial({ color: 0xeeeeee });
     geometry2.rotateX(-Math.PI * 0.5);
     const plane = new THREE.Mesh(geometry2, planeMaterial);
     plane.receiveShadow = true;
-    scene.add(plane);
+    this.scene.add(plane);
 
     var raycaster = new THREE.Raycaster();
     var mouse = new THREE.Vector2();
@@ -139,23 +207,11 @@ export default class Scene extends React.Component {
     // Main loop
     var animate = () => {
       requestAnimationFrame(animate);
-      // Smooth move for the camera
-      if (this.inZoom || this.initial) {
-        // this.camera.position.lerp(this.camera_position, 0.05);
-      }
-      spotLight.position.set(this.light_x, this.light_y, this.light_z);
+      this.camera.position.lerp(this.camera_position, 0.05);
       controls.update();
-      // scene.rotation.y += 0.001;
-      renderer.render(scene, this.camera);
+      this.scene.rotation.y = this.rotation;
+      renderer.render(this.scene, this.camera);
     };
-
-    // const gui = new dat.GUI();
-    // const lightFolder = gui.addFolder("Light");
-    // lightFolder.add(this, "light_x", 0, 100, 1);
-    // lightFolder.add(this, "light_y", 0, 100, 1);
-    // lightFolder.add(this, "light_z", 0, 100, 1);
-    // lightFolder.add(this, "angle", Math.PI / 8, Math.PI / 2, Math.PI / 8);
-    // lightFolder.open();
 
     animate();
   }
@@ -166,11 +222,31 @@ export default class Scene extends React.Component {
   };
   componentWillUnmount() {}
   render() {
+    console.log(this.loading < 100);
     return (
       <div>
+        {this.loading > 100 ? (
+          <div className="backdrop">
+            <h1>Loading Scene...</h1>
+            <div className="loading"></div>
+          </div>
+        ) : null}
         <button className="button_close" onClick={this.resetCamera}>
           X
         </button>
+        <div className="gui">
+          <p>Scene Rotation</p>
+          <ReactSlider
+            className="customSlider"
+            thumbClassName="customSlider-thumb"
+            trackClassName="customSlider-track"
+            markClassName="customSlider-mark"
+            marks={5}
+            min={0}
+            max={10}
+            onChange={(value) => (this.rotation = value)}
+          />
+        </div>
       </div>
     );
   }
