@@ -37,8 +37,14 @@ canvas {
 h1 {
   color: white;
 }
+h2 {
+  margin-top: 0.5rem;
+}
+h3 {
+  margin-top: 0.5rem;
+}
 p {
-  margin: 0;
+  margin-bottom: 0.5rem;
 }
 
 @keyframes spinner {
@@ -58,12 +64,18 @@ p {
   animation: spinner 2s linear infinite;
   margin: 3rem auto;
 }
-
+.separator {
+  height: 5px;
+  border-radius: 100px;
+  margin: 3rem auto 0 auto;
+  width: 80%;
+  background-color: rgb(0, 0, 0, 0.5);
+}
 .gui {
   position: absolute;
   right: 10px;
   top: 10px;
-  padding: 2rem;
+  padding: 1rem 2rem 2rem 2rem;
   width: 200px;
   background-color: white;
   border-radius: 5px;
@@ -76,18 +88,13 @@ p {
 }
 
 .customSlider {
-  /* max width of your slider */
   max-width: 300px;
-  /* Optional: Only If you want to center your slider in the page */
   margin: auto;
 }
 
 .customSlider-track {
-  /* Top value to align your track to the center of your thumb */
   top: 8px;
-  /* thickness of the track */
   height: 4px;
-  /* default color of your track */
   background: var(--track-color);
 }
 
