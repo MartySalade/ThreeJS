@@ -4,6 +4,7 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader";
 import { MTLLoader } from "three/examples/jsm/loaders/MTLLoader";
 import ReactSlider from "react-slider";
+import BuildingDetail from "./BuildingDetail";
 export default class Scene extends React.Component {
   constructor(props) {
     super(props);
@@ -19,6 +20,8 @@ export default class Scene extends React.Component {
     this.loading = 0;
     this.rotation = 0;
     this.objects = [];
+    this.detail = false;
+    this.detail_object = {};
   }
 
   componentDidMount() {
@@ -32,6 +35,7 @@ export default class Scene extends React.Component {
       var intersects = raycaster.intersectObjects(this.objects, true);
 
       if (intersects.length > 0) {
+        this.detail = true;
         intersects[0].object.parent.callback();
       }
     };
@@ -108,7 +112,7 @@ export default class Scene extends React.Component {
               object.callback = this.parkCallback;
               this.scene.add(object);
               this.objects.push(object);
-              this.render();
+              this.forceUpdate();
             },
             undefined,
             (err) => console.error(err)
@@ -136,7 +140,7 @@ export default class Scene extends React.Component {
               this.scene.add(object);
               this.objects.push(object);
               this.loading += 25;
-              this.render();
+              this.forceUpdate();
             },
             undefined,
             (err) => console.error(err)
@@ -165,7 +169,7 @@ export default class Scene extends React.Component {
               this.scene.add(object);
               this.objects.push(object);
               this.loading += 25;
-              this.render();
+              this.forceUpdate();
             },
             undefined,
             (err) => console.error(err)
@@ -193,7 +197,7 @@ export default class Scene extends React.Component {
               this.scene.add(object);
               this.objects.push(object);
               this.loading += 25;
-              this.render();
+              this.forceUpdate();
             },
             undefined,
             (err) => console.error(err)
@@ -223,6 +227,7 @@ export default class Scene extends React.Component {
     var animate = () => {
       requestAnimationFrame(animate);
       this.camera.position.lerp(this.camera_position, 0.05);
+      // console.log(this.camera.position);
       controls.update();
       this.scene.rotation.y = this.rotation;
       renderer.render(this.scene, this.camera);
@@ -231,28 +236,43 @@ export default class Scene extends React.Component {
 
     animate();
   }
+  //#region Callbacks
   resetCamera = () => {
     console.log("Reset");
+    this.detail = false;
     this.camera_position.copy(new THREE.Vector3(50, 50, 50));
   };
   parkCallback = () => {
-    console.log("Park Callback");
+    this.detail_object = {
+      name: "Park",
+    };
+    this.forceUpdate();
     this.camera_position.copy(new THREE.Vector3(17, 5, 10));
   };
   HQCallback = () => {
-    console.log("HQ Callback");
+    this.detail_object = {
+      name: "Heaquarter",
+    };
+    this.forceUpdate();
   };
   HotelCallback = () => {
-    console.log("Hotel Callback");
+    this.detail_object = {
+      name: "Hotel",
+    };
+    this.forceUpdate();
   };
   RestaurantCallback = () => {
-    console.log("Restau Callback");
+    this.detail_object = {
+      name: "Restaurant",
+    };
+    this.forceUpdate();
   };
+  //#endregion
   componentWillUnmount() {}
   render() {
     return (
       <div>
-        {this.loading > 100 ? (
+        {this.loading < 100 ? (
           <div className="backdrop">
             <h1>Loading Scene...</h1>
             <div className="loading"></div>
@@ -261,6 +281,7 @@ export default class Scene extends React.Component {
         <button className="button_close" onClick={this.resetCamera}>
           X
         </button>
+        {this.detail && <BuildingDetail object={this.detail_object} />}
         <div className="gui">
           <h2>Controls</h2>
           <h3>Scene</h3>

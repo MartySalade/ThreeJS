@@ -35,7 +35,7 @@ canvas {
 }
 
 h1 {
-  color: white;
+  color: white !important;
 }
 h2 {
   margin-top: 0.5rem;
