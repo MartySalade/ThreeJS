@@ -238,8 +238,8 @@ export default class Scene extends React.Component {
   }
   //#region Callbacks
   resetCamera = () => {
-    console.log("Reset");
     this.detail = false;
+    this.forceUpdate();
     this.camera_position.copy(new THREE.Vector3(50, 50, 50));
   };
   parkCallback = () => {
