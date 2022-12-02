@@ -22,6 +22,7 @@ export default class Scene extends React.Component {
     this.objects = [];
     this.detail = false;
     this.detail_object = {};
+    this.reset = false;
   }
 
   componentDidMount() {
@@ -33,10 +34,13 @@ export default class Scene extends React.Component {
       raycaster.setFromCamera(mouse, this.camera);
 
       var intersects = raycaster.intersectObjects(this.objects, true);
-
-      if (intersects.length > 0) {
-        this.detail = true;
-        intersects[0].object.parent.callback();
+      if (event.target && event.target.id === "close") {
+        this.resetCamera();
+      } else {
+        if (intersects.length > 0) {
+          this.detail = true;
+          intersects[0].object.parent.callback();
+        }
       }
     };
 
@@ -45,12 +49,16 @@ export default class Scene extends React.Component {
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
     var controls = new OrbitControls(this.camera, renderer.domElement);
+    this.camera.position.lerp(this.camera_position, 0.05);
+    // controls.enableRotate = false;
 
     //============ LIGHTS ============//
     //#region
-    const directional_light = new THREE.AmbientLight(0xffffff, 0.4);
-    directional_light.position.set(-2, 4, 10);
+    const directional_light = new THREE.DirectionalLight(0xffffff, 0.75);
+    directional_light.position.set(50, 50, 50);
     this.scene.add(directional_light);
+    const helper = new THREE.DirectionalLightHelper(directional_light, 5);
+    this.scene.add(helper);
     //#endregion
 
     // Adding random stars
@@ -227,7 +235,7 @@ export default class Scene extends React.Component {
     var animate = () => {
       requestAnimationFrame(animate);
       this.camera.position.lerp(this.camera_position, 0.05);
-      // console.log(this.camera.position);
+      console.log(this.camera.position);
       controls.update();
       this.scene.rotation.y = this.rotation;
       renderer.render(this.scene, this.camera);
@@ -238,34 +246,39 @@ export default class Scene extends React.Component {
   }
   //#region Callbacks
   resetCamera = () => {
-    this.detail = false;
-    this.forceUpdate();
+    this.detail_object = {
+      name: "Elrond City",
+    };
     this.camera_position.copy(new THREE.Vector3(50, 50, 50));
+    this.forceUpdate();
   };
   parkCallback = () => {
     this.detail_object = {
       name: "Park",
     };
     this.forceUpdate();
-    this.camera_position.copy(new THREE.Vector3(17, 5, 10));
+    this.camera_position.copy(new THREE.Vector3(-8, 6, 5));
   };
   HQCallback = () => {
     this.detail_object = {
       name: "Heaquarter",
     };
     this.forceUpdate();
+    this.camera_position.copy(new THREE.Vector3(2, 5, 10));
   };
   HotelCallback = () => {
     this.detail_object = {
       name: "Hotel",
     };
     this.forceUpdate();
+    this.camera_position.copy(new THREE.Vector3(-30, 5, 12));
   };
   RestaurantCallback = () => {
     this.detail_object = {
       name: "Restaurant",
     };
     this.forceUpdate();
+    this.camera_position.copy(new THREE.Vector3(40, 10, 20));
   };
   //#endregion
   componentWillUnmount() {}
@@ -278,7 +291,11 @@ export default class Scene extends React.Component {
             <div className="loading"></div>
           </div>
         ) : null}
-        <button className="button_close" onClick={this.resetCamera}>
+        <button
+          id={"close"}
+          className="button_close"
+          onClick={this.resetCamera}
+        >
           X
         </button>
         {this.detail && <BuildingDetail object={this.detail_object} />}
