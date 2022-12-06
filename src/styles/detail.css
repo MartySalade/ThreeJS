@@ -8,8 +8,32 @@
   min-height: 20px;
   min-width: 20px;
   padding: 1rem 2rem;
+  max-width: 20%;
 }
 
 h2 {
+  font-family: "Poppins";
   color: black !important;
+}
+
+h3 {
+  margin-top: 1.5rem;
+  font-family: "Poppins";
+}
+
+span {
+  color: black;
+  font-family: "Poppins";
+}
+
+.classic {
+  color: rgb(58, 58, 202);
+  font-weight: bold;
+  font-family: "Poppins";
+}
+
+.legendary {
+  color: rgb(245, 193, 22);
+  font-weight: bold;
+  font-family: "Poppins";
 }

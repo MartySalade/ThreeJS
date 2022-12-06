@@ -1,5 +1,6 @@
 .App {
   text-align: center;
+  font-family: "Poppins";
 }
 
 canvas {
@@ -27,38 +28,57 @@ canvas {
   width: 100%;
   height: 100%;
   z-index: 2;
-  background-color: black;
+  background: linear-gradient(135deg, hsl(230, 40%, 12%), hsl(230, 20%, 7%));
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
 }
-
+.type-wrapper {
+  position: relative;
+}
+.type-animation {
+  position: absolute;
+  top: 20px;
+  left: 50px;
+}
 h1 {
-  color: white !important;
+  font-size: 3.5rem;
+  font-weight: 300;
+  color: hsl(230, 100%, 95%);
+  animation: lights 3s linear infinite !important;
+  font-family: "Poppins";
 }
 h2 {
   margin-top: 0.5rem;
+  font-family: "Poppins";
 }
 h3 {
   margin-top: 0.5rem;
+  font-family: "Poppins";
 }
 p {
   margin-bottom: 0.5rem;
 }
 
-@keyframes spinner {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
+.explore_button {
+  position: absolute;
+  right: 20px;
+  top: 20px;
+  min-width: 200px;
+  border: none;
+  background-color: white;
+  border-radius: 10px;
+  padding: 1rem 3rem;
+  cursor: pointer;
+  font-family: "Poppins";
+  font-size: 1.1rem;
 }
+
 .loading {
   width: 80px;
   height: 80px;
-  border: 10px solid white;
+  border: 10px solid rgb(231, 231, 231);
   border-top: 10px solid #f90078;
   border-radius: 50%;
   animation: spinner 2s linear infinite;
@@ -73,8 +93,8 @@ p {
 }
 .gui {
   position: absolute;
-  right: 10px;
-  top: 10px;
+  right: 20px;
+  top: 90px;
   padding: 1rem 2rem 2rem 2rem;
   width: 200px;
   background-color: white;
@@ -99,22 +119,67 @@ p {
 }
 
 .customSlider-track.customSlider-track-0 {
-  /* color of the track before the thumb */
   background: var(--main-color);
 }
 
 .customSlider-thumb {
   cursor: pointer;
-  /*color for the thumb */
   background: var(--main-color);
-  /* shape of the thumb: circle */
   width: 20px;
   height: 20px;
   border-radius: 100%;
-  /* remove default outline when selected */
   outline: none;
 }
 
 .customSlider-thumb:hover {
   box-shadow: 0 0 0 8px var(--main-color-hover);
+}
+
+@keyframes lights {
+  0% {
+    color: hsl(230, 40%, 80%);
+    text-shadow: 0 0 1em hsla(320, 100%, 50%, 0.2),
+      0 0 0.125em hsla(320, 100%, 60%, 0.3),
+      -1em -0.125em 0.5em hsla(40, 100%, 60%, 0),
+      1em 0.125em 0.5em hsla(200, 100%, 60%, 0);
+  }
+
+  35% {
+    color: hsl(230, 80%, 90%);
+    text-shadow: 0 0 1em hsla(320, 100%, 50%, 0.5),
+      0 0 0.125em hsla(320, 100%, 60%, 0.5),
+      -0.5em -0.125em 0.25em hsla(40, 100%, 60%, 0.2),
+      0.5em 0.125em 0.25em hsla(200, 100%, 60%, 0.4);
+  }
+
+  70% {
+    color: hsl(230, 100%, 95%);
+    text-shadow: 0 0 1em hsla(320, 100%, 50%, 0.5),
+      0 0 0.125em hsla(320, 100%, 90%, 0.5),
+      -0.25em -0.125em 0.125em hsla(40, 100%, 60%, 0.2),
+      0.25em 0.125em 0.125em hsla(200, 100%, 60%, 0.4);
+  }
+
+  100% {
+    color: hsl(230, 80%, 90%);
+    text-shadow: 0 0 1em hsla(320, 100%, 50%, 0.5),
+      0 0 0.125em hsla(320, 100%, 60%, 0.5),
+      0.5em -0.125em 0.25em hsla(40, 100%, 60%, 0.2),
+      -0.5em 0.125em 0.25em hsla(200, 100%, 60%, 0.4);
+  }
+}
+@keyframes spinner {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.red {
+  background-color: red;
+}
+.green {
+  background-color: green;
 }
