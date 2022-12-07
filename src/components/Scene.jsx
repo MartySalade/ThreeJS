@@ -2,10 +2,6 @@ import React from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader";
-import { MTLLoader } from "three/examples/jsm/loaders/MTLLoader";
-import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
-import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
-import { SAOPass } from "three/addons/postprocessing/SAOPass.js";
 import ReactSlider from "react-slider";
 import BuildingDetail from "./BuildingDetail";
 import { TypeAnimation } from "react-type-animation";
@@ -144,6 +140,7 @@ export default class Scene extends React.Component {
           object.name = "HQ";
           object.callback = this.HQCallback;
           object.castShadow = true;
+          object.receiveShadow = true;
           this.scene.add(object);
           this.objects.push(object);
           this.loading += 25;
@@ -289,7 +286,7 @@ export default class Scene extends React.Component {
               child.castShadow = true;
             }
           });
-          object.position.set(-10, 2.4, 5);
+          object.position.set(-9.3, 2.4, 5);
           object.scale.set(0.2, 0.2, 0.2);
           object.name = "Hotel Client";
           object.castShadow = true;
@@ -310,7 +307,7 @@ export default class Scene extends React.Component {
               child.castShadow = true;
             }
           });
-          object.position.set(-9.3, 2.4, 5);
+          object.position.set(-10, 2.4, 5);
           object.scale.set(0.2, 0.2, 0.2);
           object.name = "Bellhop";
           object.castShadow = true;
@@ -334,6 +331,7 @@ export default class Scene extends React.Component {
       this.spotLight.position.set(this.light_x, this.light_y, this.light_z);
       this.spotLight.angle = Math.PI / 12;
       this.spotTarget = new THREE.Object3D();
+      this.spotLight.castShadow = true;
       this.scene.add(this.spotLight, this.spotTarget);
       this.spotLight.target = this.spotTarget;
       this.spotTarget.position.set(20, 20, 20);
@@ -376,7 +374,8 @@ export default class Scene extends React.Component {
       this.scene.background = new THREE.Color("#000000");
       this.renderer.setSize(window.innerWidth, window.innerHeight);
       document.body.appendChild(this.renderer.domElement);
-
+      this.renderer.shadowMap.enabled = true;
+      this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
       this.camera.position.lerp(this.camera_position, 0.05);
       this.controls.target.set(12, 0, 0);
 
@@ -391,7 +390,7 @@ export default class Scene extends React.Component {
     var animate = () => {
       requestAnimationFrame(animate);
       if (!this.visit) {
-        this.camera.position.lerp(this.camera_position, 0.05);
+        this.camera.position.lerp(this.camera_position, 0.1);
       }
       this.controls.update();
       this.ambiant.intensity = this.ambiantIntensity;
@@ -420,7 +419,7 @@ export default class Scene extends React.Component {
   };
   HQCallback = () => {
     this.detail_object = {
-      name: "Heaquarter",
+      name: "Headquarter",
       description: "Heaquarter is the emblematic building of Elrond City",
       collection: "Genesis",
       supply: "150",
@@ -429,7 +428,6 @@ export default class Scene extends React.Component {
     this.controls.target.set(12, 3.3, 7);
     this.forceUpdate();
     this.spotLight3.intensity = 0.9;
-    this.ambiantIntensity = 0.5;
     this.spotLight.intensity = 0;
     this.camera_position.copy(new THREE.Vector3(11, 3, 8.8));
   };
@@ -442,7 +440,6 @@ export default class Scene extends React.Component {
       jobs: ["Bellhop", "Hotel client"],
     };
     this.controls.target.set(-9.3, 3.5, 5);
-    this.ambiant.intensity = 0.5;
     this.spotLight2.intensity = 0.9;
     this.spotLight.intensity = 0;
     this.camera_position.copy(new THREE.Vector3(-10, 2.91, 6.5));
@@ -452,12 +449,11 @@ export default class Scene extends React.Component {
     this.detail_object = {
       name: "Restaurant",
       description: "The Restaurant serves the greatest meals of Elrond City",
-      collection: "Genesis",
-      supply: "150",
+      collection: "Expansion",
+      supply: "500",
       jobs: ["Cook", "Chef"],
     };
     this.controls.target.set(26.5, 3.2, 8.5);
-    this.ambiant.intensity = 0.5;
     this.spotLight4.intensity = 0.9;
     this.spotLight.intensity = 0;
     this.camera_position.copy(new THREE.Vector3(27, 2.6, 10));
@@ -490,7 +486,7 @@ export default class Scene extends React.Component {
             this.forceUpdate();
           }}
         >
-          {"EXPLORE " + (this.visit ? "ON" : "OFF")}
+          {"FREE CAMERA " + (this.visit ? "ON" : "OFF")}
         </button>
         {this.detail && this.detail_object.name !== "" && (
           <BuildingDetail object={this.detail_object} />

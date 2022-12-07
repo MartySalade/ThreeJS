@@ -63,16 +63,18 @@ p {
 
 .explore_button {
   position: absolute;
-  right: 20px;
-  top: 20px;
+  right: 0;
+  left: 0;
+  bottom: 0px;
+  margin: auto;
   min-width: 200px;
   border: none;
-  background-color: white;
+  color: white;
   border-radius: 10px;
-  padding: 1rem 3rem;
+  padding: 1rem 0;
   cursor: pointer;
   font-family: "Poppins";
-  font-size: 1.1rem;
+  font-size: 1.3rem;
 }
 
 .loading {
@@ -94,7 +96,7 @@ p {
 .gui {
   position: absolute;
   right: 20px;
-  top: 90px;
+  top: 20px;
   padding: 1rem 2rem 2rem 2rem;
   width: 200px;
   background-color: white;
@@ -178,8 +180,8 @@ p {
 }
 
 .red {
-  background-color: red;
+  background-color: #ff4757;
 }
 .green {
-  background-color: green;
+  background-color: #2ed573;
 }
